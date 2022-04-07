@@ -4,7 +4,7 @@ import java.io.File
 
 import com.karumi.shot.domain._
 import com.karumi.shot.domain.model.ScreenshotsSuite
-import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.ImmutableImage
 
 class ScreenshotsComparator {
 
@@ -15,15 +15,15 @@ class ScreenshotsComparator {
   }
 
   private def compareScreenshot(
-      screenshot: Screenshot,
-      tolerance: Double
-  ): Option[ScreenshotComparisonError] = {
+                                 screenshot: Screenshot,
+                                 tolerance: Double
+                               ): Option[ScreenshotComparisonError] = {
     val recordedScreenshotFile = new File(screenshot.recordedScreenshotPath)
     if (!recordedScreenshotFile.exists()) {
       Some(ScreenshotNotFound(screenshot))
     } else {
       val oldScreenshot =
-        Image.fromFile(recordedScreenshotFile)
+        ImmutableImage.loader().fromFile(recordedScreenshotFile)
       val newScreenshot = ScreenshotComposer.composeNewScreenshot(screenshot)
       if (!haveSameDimensions(newScreenshot, oldScreenshot)) {
         val originalDimension =
@@ -39,11 +39,11 @@ class ScreenshotsComparator {
   }
 
   private def imagesAreDifferent(
-      screenshot: Screenshot,
-      oldScreenshot: Image,
-      newScreenshot: Image,
-      tolerance: Double
-  ) = {
+                                  screenshot: Screenshot,
+                                  oldScreenshot: ImmutableImage,
+                                  newScreenshot: ImmutableImage,
+                                  tolerance: Double
+                                ) = {
     if (oldScreenshot == newScreenshot) {
       false
     } else {
@@ -67,7 +67,7 @@ class ScreenshotsComparator {
     }
   }
 
-  private def haveSameDimensions(newScreenshot: Image, recordedScreenshot: Image): Boolean =
+  private def haveSameDimensions(newScreenshot: ImmutableImage, recordedScreenshot: ImmutableImage): Boolean =
     newScreenshot.width == recordedScreenshot.width && newScreenshot.height == recordedScreenshot.height
 
 }
